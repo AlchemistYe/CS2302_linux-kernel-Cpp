@@ -18,8 +18,7 @@ static const struct proc_ops proc_ops = {
     .proc_read=proc_read,
  };
  
- int proc_init(void)
- {
+ int proc_init(void) {
     proc_create(PROC_NAME,0666,NULL,&proc_ops);
     begin=jiffies;
     printk(KERN_INFO "proc/seconds is created!");
@@ -27,15 +26,13 @@ static const struct proc_ops proc_ops = {
     return 0;
  }
  
- void proc_exit(void)
- {  
+ void proc_exit(void) {  
     remove_proc_entry(PROC_NAME,NULL);
     printk(KERN_INFO "proc/seconds is deleted!");
     printk(KERN_INFO "%lu\n",end);
  }
  
- ssize_t proc_read(struct file *file,char __user *usr_buf,size_t count,loff_t *pos)
- {
+ ssize_t proc_read(struct file *file,char __user *usr_buf,size_t count,loff_t *pos) {
     int rv=0;
     char buffer[BUFFER_SIZE];
     static int completed=0;
