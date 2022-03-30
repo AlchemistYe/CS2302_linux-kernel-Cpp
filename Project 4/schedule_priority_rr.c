@@ -40,41 +40,41 @@ void schedule() {
 	while (current->next)current = current -> next;
 	Task *task = current -> task;
 	
-	if(task -> burst <= QUANTUM){
-	   run(task, task -> burst);
-	   delete(&head[i], task);
-	   time += task -> burst;
+	    if(task -> burst <= QUANTUM){
+	       run(task, task -> burst);
+	       delete(&head[i], task);
+	       time += task -> burst;
 
-	   int last_wait_time = time - task -> last_exec - task -> burst;	
-	   task -> wait += last_wait_time;	
-	   if (task -> last_exec == 0)
-	        task -> res = time - task -> burst;	
-	   task -> last_exec = time;
-	   task -> turn = time;
+	       int last_wait_time = time - task -> last_exec - task -> burst;	
+	       task -> wait += last_wait_time;	
+	       if (task -> last_exec == 0)
+	          task -> res = time - task -> burst;	
+	       task -> last_exec = time;
+	       task -> turn = time;
 	
-           count += 1;
-           total_wait += task -> wait;
-	   total_res += task -> res;
-      	   total_turn += task -> turn;
+               count += 1;
+               total_wait += task -> wait;
+	       total_res += task -> res;
+      	       total_turn += task -> turn;
 
-	   free(task -> name);
-	   free(task);	
-	}
-	else{
-	   run(task, QUANTUM);
-	   delete(&head[i], task);
-	   time += QUANTUM;
-	   task -> burst -= QUANTUM;
+	       free(task -> name);
+	       free(task);	
+	    }
+	    else{
+	       run(task, QUANTUM);
+	       delete(&head[i], task);
+	       time += QUANTUM;
+	       task -> burst -= QUANTUM;
 	   
-	   int last_wait_time = time - task -> last_exec - QUANTUM;	
-	   task -> wait += last_wait_time;	
-	   if (task -> last_exec == 0)
-	        task -> res = time - QUANTUM;	
-	   task -> last_exec = time;
-	   task -> turn = time;
+	       int last_wait_time = time - task -> last_exec - QUANTUM;	
+	       task -> wait += last_wait_time;	
+	       if (task -> last_exec == 0)
+	            task -> res = time - QUANTUM;	
+	       task -> last_exec = time;
+	       task -> turn = time;
 	   
-	   insert(&head[i], task);	
-	}
+	       insert(&head[i], task);	
+	    }
 	}
     }	
 	printf("\n");
