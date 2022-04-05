@@ -62,124 +62,124 @@ int main(void)
         
       pid = fork();
       if(pid<0){
-         fprintf(stderr,"Fork Failed \n");
-         exit(1);
+          fprintf(stderr,"Fork Failed \n");
+          exit(1);
       }    
       else if(pid==0){
-        for(int i=0;i<=MAX_LINE/2;i++){
-           args[i]=(char*)malloc(MAX_LINE * sizeof(char));
-        }
-        int argn=transmit(instru,args);
-        for(int i=argn;i<=MAX_LINE/2;i++){
-           free(args[i]);
-           args[i]=NULL;
-        }
-        if(concurrency==1){
-           argn--;
-           free(args[argn]);
-           args[argn]=NULL;
-        }
-        int position=-1;
-        for(int i=0;i<argn;i++){
-            if(strcmp(args[i], "|") == 0){
-               position=i;
-               break;
-            }
-        }
-        if(position>0){
-             if(position==0||position==argn-1){
-                  fprintf(stderr, "'|' has a wrong position \n");
+          for(int i=0;i<=MAX_LINE/2;i++){
+             args[i]=(char*)malloc(MAX_LINE * sizeof(char));
+          }
+          int argn=transmit(instru,args);
+          for(int i=argn;i<=MAX_LINE/2;i++){
+             free(args[i]);
+             args[i]=NULL;
+          }
+          if(concurrency==1){
+             argn--;
+             free(args[argn]);
+             args[argn]=NULL;
+          }
+          int position=-1;
+          for(int i=0;i<argn;i++){
+              if(strcmp(args[i], "|") == 0){
+                 position=i;
+                 break;
+              }
+          }
+          if(position>0){
+               if(position==0||position==argn-1){
+                    fprintf(stderr, "'|' has a wrong position \n");
+                    exit(1);
+               }
+               int fd[2];
+               if (pipe(fd) == -1) {
+                 fprintf(stderr,"Pipe failed \n");
+                 exit(1);
+               }
+               pid=fork();
+               if(pid < 0){
+                  fprintf(stderr, "Fork Failed \n");
                   exit(1);
-             }
-             int fd[2];
-             if (pipe(fd) == -1) {
-               fprintf(stderr,"Pipe failed \n");
-               exit(1);
-             }
-             pid=fork();
-             if(pid < 0){
-                fprintf(stderr, "Fork Failed \n");
-                exit(1);
-             }
-             else if(pid==0){
-                close(fd[WRITE_END]);
-                for(int i=0;i<=position;i++)free(args[i]);
-                for(int i=position+1;i<argn;i++)args[i-position-1]=args[i];
-                for(int i=argn-position-1;i<argn;i++)args[i]=NULL;
-                argn=argn-position-1;
-                if(dup2(fd[READ_END],STDIN_FILENO)<0){ 
-                    fprintf(stderr, "Duplication Failed \n");
-                    exit(1);
-                }
-                execvp(args[0],args);
-                close(fd[READ_END]);
-                for(int i=0;i<argn;i++)free(args[i]);
-                free(instru);
-                free(in_file);
-                free(out_file);
-             }
-             else{
-                close(fd[READ_END]);             
-                for(int i=position;i<argn;i++){
-                    free(args[i]);
-                    args[i]=NULL;
-                }
-                argn=position;
-                if(dup2(fd[WRITE_END],STDOUT_FILENO)<0){
-                    fprintf(stderr, "Duplication Failed \n");
-                    exit(1);
-                }   
-                execvp(args[0],args);
-                close(fd[WRITE_END]); 
-             }
-        }
-        else{
-            int indirect=0,outdirect=0,infd=-1,outfd=-1;
-            if(argn>=3&&(strcmp(args[argn - 2], "<") == 0 || strcmp(args[argn - 2], ">") == 0)){
-               if(strcmp(args[argn-2], "<") == 0 ){
-                   indirect=1;
-                   strcpy(in_file,args[argn-1]);
                }
-               else if(strcmp(args[argn-2], ">") == 0){
-                   outdirect=1;
-                   strcpy(out_file,args[argn-1]);
+               else if(pid==0){
+                   close(fd[WRITE_END]);
+                   for(int i=0;i<=position;i++)free(args[i]);
+                   for(int i=position+1;i<argn;i++)args[i-position-1]=args[i];
+                   for(int i=argn-position-1;i<argn;i++)args[i]=NULL;
+                   argn=argn-position-1;
+                   if(dup2(fd[READ_END],STDIN_FILENO)<0){ 
+                       fprintf(stderr, "Duplication Failed \n");
+                       exit(1);
+                   }
+                   execvp(args[0],args);
+                   close(fd[READ_END]);
+                   for(int i=0;i<argn;i++)free(args[i]);
+                   free(instru);
+                   free(in_file);
+                   free(out_file);
                }
-               argn-=2;
-               free(args[argn]);args[argn]=NULL;
-               free(args[argn+1]);args[argn+1]=NULL;
-            }           
-            if(indirect){
-                infd=open(in_file,O_RDONLY,0644);            
-                if(infd<0){
-                   fprintf(stderr, "No such files\n");
-                   exit(1);
-                }
-                if(dup2(infd,STDIN_FILENO)<0){
-                   fprintf(stderr, "Duplication Failed\n");
-                   exit(1);
-                }                
-            }
-            if(outdirect){
-                outfd=open(out_file,O_WRONLY|O_TRUNC|O_CREAT,0644);            
-                if(outfd<0){
-                   fprintf(stderr, "No such files\n");
-                   exit(1);
-                }
-                if(dup2(outfd,STDOUT_FILENO)<0){
-                   fprintf(stderr, "Duplication Failed\n");
-                   exit(1);
-                }    
-            }
+               else{
+                   close(fd[READ_END]);             
+                   for(int i=position;i<argn;i++){
+                       free(args[i]);
+                       args[i]=NULL;
+                   }
+                   argn=position;
+                   if(dup2(fd[WRITE_END],STDOUT_FILENO)<0){
+                       fprintf(stderr, "Duplication Failed \n");
+                       exit(1);
+                   }   
+                   execvp(args[0],args);
+                   close(fd[WRITE_END]); 
+               }
+         }
+         else{
+               int indirect=0,outdirect=0,infd=-1,outfd=-1;
+               if(argn>=3&&(strcmp(args[argn - 2], "<") == 0 || strcmp(args[argn - 2], ">") == 0)){
+                   if(strcmp(args[argn-2], "<") == 0 ){
+                       indirect=1;
+                       strcpy(in_file,args[argn-1]);
+                   }
+                   else if(strcmp(args[argn-2], ">") == 0){
+                       outdirect=1;
+                       strcpy(out_file,args[argn-1]);
+                   }
+                   argn-=2;
+                   free(args[argn]);args[argn]=NULL;
+                   free(args[argn+1]);args[argn+1]=NULL;
+               }           
+               if(indirect){
+                   infd=open(in_file,O_RDONLY,0644);            
+                  if(infd<0){
+                      fprintf(stderr, "No such files\n");
+                      exit(1);
+                  }
+                  if(dup2(infd,STDIN_FILENO)<0){
+                      fprintf(stderr, "Duplication Failed\n");
+                      exit(1);
+                  }                
+               }
+               if(outdirect){
+                   outfd=open(out_file,O_WRONLY|O_TRUNC|O_CREAT,0644);            
+                   if(outfd<0){
+                       fprintf(stderr, "No such files\n");
+                       exit(1);
+                   }
+                   if(dup2(outfd,STDOUT_FILENO)<0){
+                       fprintf(stderr, "Duplication Failed\n");
+                       exit(1);
+                   }    
+               }
             execvp(args[0],args);
             if(indirect && infd>0)close(infd);
             if(outdirect && outfd>0)close(outfd);
-        }
-        for(int i=0;i<argn;i++)free(args[i]);
-        free(instru);
-        free(last_instru);
-        free(in_file);
-        free(out_file);
-        exit(0);
+         }
+         for(int i=0;i<argn;i++)free(args[i]);
+         free(instru);
+         free(last_instru);
+         free(in_file);
+         free(out_file);
+         exit(0);
       }
       else {
           if(concurrency==0){
