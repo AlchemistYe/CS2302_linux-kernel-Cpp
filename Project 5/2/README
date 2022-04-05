@@ -1,0 +1,17 @@
+These files support the POSIX implementation of the producer-consumer problem.
+
+Source files:
+
+- p_c.c (main program)
+
+- buffer.c (implementation of buffer)
+
+- buffer.h (header file containing function prototypes)
+
+Makefile
+
+To run the make file, enter "make"
+
+To run the example program, enter "./p_c [time] [producer_number] [consumer_number]".[time] stands for the running time, [producer_number] stands for the number of producers and [consumer_number] stands for the number of consumers.
+
+
