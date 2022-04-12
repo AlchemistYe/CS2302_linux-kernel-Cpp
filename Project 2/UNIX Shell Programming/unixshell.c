@@ -256,15 +256,3 @@ int transmit(char *instru,char **args){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
